@@ -1,0 +1,77 @@
+=== READ COMMITTED reset ===
+INSERT 0 0
+UPDATE 1
+     sku     | cached_stock | ledger_stock 
+-------------+--------------+--------------
+ S-JUM-PIECE |         1.00 |         1.00
+(1 row)
+
+=== Window A ===
+[exit=]
+BEGIN
+ first_read 
+------------
+    7920.00
+(1 row)
+
+ pg_sleep 
+----------
+ 
+(1 row)
+
+ second_read 
+-------------
+     8420.00
+(1 row)
+
+COMMIT
+
+
+=== Window B price update ===
+[exit=]
+ pg_sleep 
+----------
+ 
+(1 row)
+
+UPDATE 1
+
+
+=== REPEATABLE READ reset ===
+INSERT 0 0
+UPDATE 1
+     sku     | cached_stock | ledger_stock 
+-------------+--------------+--------------
+ S-JUM-PIECE |         1.00 |         1.00
+(1 row)
+
+=== Window A ===
+[exit=]
+BEGIN
+ first_read 
+------------
+    7920.00
+(1 row)
+
+ pg_sleep 
+----------
+ 
+(1 row)
+
+ second_read 
+-------------
+     7920.00
+(1 row)
+
+COMMIT
+
+
+=== Window B price update ===
+[exit=]
+ pg_sleep 
+----------
+ 
+(1 row)
+
+UPDATE 1
+

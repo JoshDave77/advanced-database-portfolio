@@ -1,0 +1,52 @@
+                                                                               QUERY PLAN                                                                                
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=3766.07..3766.08 rows=4 width=45) (actual time=31.174..31.179 rows=4 loops=1)
+   Sort Key: (sum((oi.quantity * oi.unit_price))) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=1264
+   ->  GroupAggregate  (cost=3664.00..3766.03 rows=4 width=45) (actual time=29.075..31.159 rows=4 loops=1)
+         Group Key: z.zone_name
+         Buffers: shared hit=1261
+         ->  Sort  (cost=3664.00..3684.40 rows=8158 width=19) (actual time=28.519..28.950 rows=8303 loops=1)
+               Sort Key: z.zone_name, o.order_id
+               Sort Method: quicksort  Memory: 774kB
+               Buffers: shared hit=1261
+               ->  Hash Join  (cost=693.26..3133.98 rows=8158 width=19) (actual time=2.168..23.456 rows=8303 loops=1)
+                     Hash Cond: (c.zone_id = z.zone_id)
+                     Buffers: shared hit=1255
+                     ->  Hash Join  (cost=692.17..3088.78 rows=8158 width=16) (actual time=2.150..22.315 rows=8303 loops=1)
+                           Hash Cond: (o.customer_id = c.customer_id)
+                           Buffers: shared hit=1254
+                           ->  Hash Join  (cost=620.17..2995.32 rows=8158 width=18) (actual time=1.674..20.431 rows=8303 loops=1)
+                                 Hash Cond: (oi.order_id = o.order_id)
+                                 Buffers: shared hit=1227
+                                 ->  Seq Scan on order_item oi  (cost=0.00..2047.00 rows=125000 width=14) (actual time=0.004..8.542 rows=125000 loops=1)
+                                       Buffers: shared hit=797
+                                 ->  Hash  (cost=579.38..579.38 rows=3263 width=8) (actual time=1.650..1.651 rows=3313 loops=1)
+                                       Buckets: 4096  Batches: 1  Memory Usage: 162kB
+                                       Buffers: shared hit=430
+                                       ->  Bitmap Heap Scan on orders o  (cost=80.00..579.38 rows=3263 width=8) (actual time=0.223..1.306 rows=3313 loops=1)
+                                             Recheck Cond: (order_date >= (now() - '30 days'::interval))
+                                             Filter: ((status)::text = 'delivered'::text)
+                                             Rows Removed by Filter: 803
+                                             Heap Blocks: exact=417
+                                             Buffers: shared hit=430
+                                             ->  Bitmap Index Scan on idx_orders_date  (cost=0.00..79.19 rows=4119 width=0) (actual time=0.179..0.179 rows=4116 loops=1)
+                                                   Index Cond: (order_date >= (now() - '30 days'::interval))
+                                                   Buffers: shared hit=13
+                           ->  Hash  (cost=47.00..47.00 rows=2000 width=6) (actual time=0.468..0.468 rows=2000 loops=1)
+                                 Buckets: 2048  Batches: 1  Memory Usage: 91kB
+                                 Buffers: shared hit=27
+                                 ->  Seq Scan on customer c  (cost=0.00..47.00 rows=2000 width=6) (actual time=0.003..0.274 rows=2000 loops=1)
+                                       Buffers: shared hit=27
+                     ->  Hash  (cost=1.04..1.04 rows=4 width=7) (actual time=0.010..0.010 rows=4 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                           Buffers: shared hit=1
+                           ->  Seq Scan on delivery_zone z  (cost=0.00..1.04 rows=4 width=7) (actual time=0.003..0.004 rows=4 loops=1)
+                                 Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=407
+ Planning Time: 0.905 ms
+ Execution Time: 31.286 ms
+(48 rows)
+

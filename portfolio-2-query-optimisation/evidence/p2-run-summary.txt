@@ -1,0 +1,22 @@
+Portfolio 2 query-plan execution times from this local PostgreSQL 18 run.
+Execution Time values are read from the generated plans/ files.
+
+q1_customer_order_history
+  before:  Execution Time: 2.935 ms
+  after:   Execution Time: 0.394 ms
+
+q2_monthly_revenue
+  before:  Execution Time: 64.919 ms
+  after:   Execution Time: 48.440 ms
+
+q3_revenue_by_zone
+  before:  Execution Time: 35.436 ms
+  after:   Execution Time: 31.286 ms
+
+q4_unpaid_orders
+  before:  Execution Time: 19.420 ms
+  after:   Execution Time: 14.240 ms
+
+q5_stock_history
+  before:  Execution Time: 9.508 ms
+  after:   Execution Time: 1.607 ms

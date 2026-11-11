@@ -1,0 +1,72 @@
+=== Reset demo product ===
+INSERT 0 0
+UPDATE 1
+     sku     | cached_stock | ledger_stock 
+-------------+--------------+--------------
+ S-JUM-PIECE |         1.00 |         1.00
+(1 row)
+
+
+
+=== Demo 1: COMMIT and ROLLBACK ===
+=== Before ===
+ orders_before 
+---------------
+         50003
+(1 row)
+
+     sku     | quantity_on_hand 
+-------------+------------------
+ F-MED-KG    |         50383.50
+ S-JUM-PIECE |             1.00
+(2 rows)
+
+=== A. Successful order: 2.5 kg fresh medium for customer 1 -> COMMIT ===
+BEGIN
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+COMMIT
+ committed_order_id 
+--------------------
+              50005
+(1 row)
+
+ order_id |  status   
+----------+-----------
+    50005 | confirmed
+(1 row)
+
+=== B. Failing order: 5 pieces smoked jumbo but only 1 in stock -> ROLLBACK ===
+BEGIN
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+ROLLBACK
+=== After: the failed order left nothing behind ===
+ new_orders_should_be_1 
+------------------------
+                      1
+(1 row)
+
+ failed_order_rows_should_be_0 
+-------------------------------
+                             0
+(1 row)
+
+ failed_ledger_rows_should_be_0 
+--------------------------------
+                              0
+(1 row)
+
+     sku     | quantity_on_hand 
+-------------+------------------
+ F-MED-KG    |         50381.00
+ S-JUM-PIECE |             1.00
+(2 rows)
+
+
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-3-transactions-concurrency/01_commit_rollback.sql:29: ERROR:  new row for relation "product" violates check constraint "product_quantity_on_hand_check"
+DETAIL:  Failing row contains (16, S-JUM-PIECE, Smoked catfish jumbo (per piece), smoked, jumbo, piece, 7920.00, -4.00, t).
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-3-transactions-concurrency/01_commit_rollback.sql:31: ERROR:  current transaction is aborted, commands ignored until end of transaction block

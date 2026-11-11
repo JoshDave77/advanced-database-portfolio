@@ -1,0 +1,35 @@
+schema.sql run output:
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-1-database-design/schema.sql:8: NOTICE:  table "delivery" does not exist, skipping
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-1-database-design/schema.sql:8: NOTICE:  table "payment" does not exist, skipping
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-1-database-design/schema.sql:8: NOTICE:  table "order_item" does not exist, skipping
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-1-database-design/schema.sql:8: NOTICE:  table "stock_movement" does not exist, skipping
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-1-database-design/schema.sql:8: NOTICE:  table "orders" does not exist, skipping
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-1-database-design/schema.sql:8: NOTICE:  table "batch" does not exist, skipping
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-1-database-design/schema.sql:8: NOTICE:  table "product" does not exist, skipping
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-1-database-design/schema.sql:8: NOTICE:  table "customer" does not exist, skipping
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-1-database-design/schema.sql:8: NOTICE:  table "staff" does not exist, skipping
+psql:C:/Users/Josh Kay/Documents/advanced-database-portfolio/portfolio-1-database-design/schema.sql:8: NOTICE:  table "delivery_zone" does not exist, skipping
+DROP TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 4
+
+Tables found:
+batch
+customer
+delivery
+delivery_zone
+order_item
+orders
+payment
+product
+staff
+stock_movement

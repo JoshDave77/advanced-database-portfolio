@@ -1,0 +1,40 @@
+=== Reset ===
+INSERT 0 0
+UPDATE 1
+     sku     | cached_stock | ledger_stock 
+-------------+--------------+--------------
+ S-JUM-PIECE |         1.00 |         1.00
+(1 row)
+
+=== Window A ===
+[exit=]
+BEGIN
+ window_a_stock 
+----------------
+           1.00
+(1 row)
+
+ pg_sleep 
+----------
+ 
+(1 row)
+
+UPDATE 1
+COMMIT
+
+
+=== Window B (serialization failure expected) ===
+[exit=]
+BEGIN
+ window_b_snapshot 
+-------------------
+              1.00
+(1 row)
+
+ pg_sleep 
+----------
+ 
+(1 row)
+
+
+ERROR:  could not serialize access due to concurrent update

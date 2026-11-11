@@ -1,0 +1,30 @@
+                                                                           QUERY PLAN                                                                           
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1745.85..1757.30 rows=4578 width=50) (actual time=13.616..13.955 rows=4577 loops=1)
+   Sort Key: o.order_date
+   Sort Method: quicksort  Memory: 570kB
+   Buffers: shared hit=927
+   ->  Hash Join  (cost=305.18..1467.50 rows=4578 width=50) (actual time=2.957..12.176 rows=4577 loops=1)
+         Hash Cond: (o.customer_id = c.customer_id)
+         Buffers: shared hit=924
+         ->  Hash Join  (cost=233.18..1383.46 rows=4578 width=29) (actual time=2.318..10.750 rows=4577 loops=1)
+               Hash Cond: (o.order_id = p.order_id)
+               Buffers: shared hit=897
+               ->  Seq Scan on orders o  (cost=0.00..917.00 rows=50000 width=16) (actual time=0.004..3.672 rows=50000 loops=1)
+                     Buffers: shared hit=417
+               ->  Hash  (cost=175.96..175.96 rows=4578 width=17) (actual time=2.281..2.282 rows=4577 loops=1)
+                     Buckets: 8192  Batches: 1  Memory Usage: 291kB
+                     Buffers: shared hit=480
+                     ->  Index Scan using idx_payment_pending on payment p  (cost=0.28..175.96 rows=4578 width=17) (actual time=0.009..1.528 rows=4577 loops=1)
+                           Buffers: shared hit=480
+         ->  Hash  (cost=47.00..47.00 rows=2000 width=29) (actual time=0.629..0.629 rows=2000 loops=1)
+               Buckets: 2048  Batches: 1  Memory Usage: 141kB
+               Buffers: shared hit=27
+               ->  Seq Scan on customer c  (cost=0.00..47.00 rows=2000 width=29) (actual time=0.005..0.222 rows=2000 loops=1)
+                     Buffers: shared hit=27
+ Planning:
+   Buffers: shared hit=324
+ Planning Time: 0.738 ms
+ Execution Time: 14.240 ms
+(26 rows)
+

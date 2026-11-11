@@ -1,0 +1,19 @@
+                                                                  QUERY PLAN                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1148.39..1150.83 rows=977 width=30) (actual time=1.483..1.529 rows=1009 loops=1)
+   Sort Key: moved_at DESC
+   Sort Method: quicksort  Memory: 80kB
+   Buffers: shared hit=674
+   ->  Bitmap Heap Scan on stock_movement  (cost=26.44..1099.87 rows=977 width=30) (actual time=0.278..1.231 rows=1009 loops=1)
+         Recheck Cond: ((product_id = 10) AND (moved_at >= (now() - '30 days'::interval)))
+         Heap Blocks: exact=664
+         Buffers: shared hit=671
+         ->  Bitmap Index Scan on idx_stock_movement_prod_dt  (cost=0.00..26.19 rows=977 width=0) (actual time=0.198..0.198 rows=1009 loops=1)
+               Index Cond: ((product_id = 10) AND (moved_at >= (now() - '30 days'::interval)))
+               Buffers: shared hit=7
+ Planning:
+   Buffers: shared hit=131
+ Planning Time: 0.314 ms
+ Execution Time: 1.607 ms
+(15 rows)
+

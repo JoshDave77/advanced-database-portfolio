@@ -1,0 +1,27 @@
+                                                              QUERY PLAN                                                               
+---------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=6256.96..6813.81 rows=12040 width=48) (actual time=56.170..64.751 rows=4 loops=1)
+   Group Key: (date_trunc('month'::text, o.order_date))
+   Buffers: shared hit=1220
+   ->  Sort  (cost=6256.96..6332.21 rows=30100 width=22) (actual time=53.046..55.013 rows=30349 loops=1)
+         Sort Key: (date_trunc('month'::text, o.order_date)), o.order_id
+         Sort Method: quicksort  Memory: 2191kB
+         Buffers: shared hit=1220
+         ->  Hash Join  (cost=1567.50..4017.90 rows=30100 width=22) (actual time=10.523..39.341 rows=30349 loops=1)
+               Hash Cond: (oi.order_id = o.order_id)
+               Buffers: shared hit=1214
+               ->  Seq Scan on order_item oi  (cost=0.00..2047.00 rows=125000 width=14) (actual time=0.003..9.821 rows=125000 loops=1)
+                     Buffers: shared hit=797
+               ->  Hash  (cost=1417.00..1417.00 rows=12040 width=12) (actual time=10.454..10.455 rows=12076 loops=1)
+                     Buckets: 16384  Batches: 1  Memory Usage: 647kB
+                     Buffers: shared hit=417
+                     ->  Seq Scan on orders o  (cost=0.00..1417.00 rows=12040 width=12) (actual time=0.008..8.813 rows=12076 loops=1)
+                           Filter: (((status)::text <> 'cancelled'::text) AND (order_date >= (now() - '90 days'::interval)))
+                           Rows Removed by Filter: 37924
+                           Buffers: shared hit=417
+ Planning:
+   Buffers: shared hit=156
+ Planning Time: 0.610 ms
+ Execution Time: 64.919 ms
+(23 rows)
+

@@ -1,0 +1,35 @@
+=== Reset ===
+INSERT 0 1
+UPDATE 1
+     sku     | cached_stock | ledger_stock 
+-------------+--------------+--------------
+ S-JUM-PIECE |         1.00 |         1.00
+(1 row)
+
+=== Window A ===
+[exit=]
+BEGIN
+ window_a_locked_stock 
+-----------------------
+                  1.00
+(1 row)
+
+ pg_sleep 
+----------
+ 
+(1 row)
+
+UPDATE 1
+COMMIT
+
+
+=== Window B (blocks, then sees 0) ===
+[exit=]
+BEGIN
+ window_b_stock_after_wait 
+---------------------------
+                      0.00
+(1 row)
+
+ROLLBACK
+

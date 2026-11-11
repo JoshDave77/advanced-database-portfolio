@@ -1,0 +1,47 @@
+                                                                       QUERY PLAN                                                                        
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=4603.39..4603.40 rows=4 width=45) (actual time=35.343..35.347 rows=4 loops=1)
+   Sort Key: (sum((oi.quantity * oi.unit_price))) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=1251
+   ->  GroupAggregate  (cost=4501.36..4603.35 rows=4 width=45) (actual time=33.783..35.327 rows=4 loops=1)
+         Group Key: z.zone_name
+         Buffers: shared hit=1248
+         ->  Sort  (cost=4501.36..4521.75 rows=8155 width=19) (actual time=33.308..33.661 rows=8303 loops=1)
+               Sort Key: z.zone_name, o.order_id
+               Sort Method: quicksort  Memory: 774kB
+               Buffers: shared hit=1248
+               ->  Hash Join  (cost=1530.87..3971.55 rows=8155 width=19) (actual time=7.924..28.913 rows=8303 loops=1)
+                     Hash Cond: (c.zone_id = z.zone_id)
+                     Buffers: shared hit=1242
+                     ->  Hash Join  (cost=1529.78..3926.37 rows=8155 width=16) (actual time=7.904..27.740 rows=8303 loops=1)
+                           Hash Cond: (o.customer_id = c.customer_id)
+                           Buffers: shared hit=1241
+                           ->  Hash Join  (cost=1457.78..3832.92 rows=8155 width=18) (actual time=7.475..25.974 rows=8303 loops=1)
+                                 Hash Cond: (oi.order_id = o.order_id)
+                                 Buffers: shared hit=1214
+                                 ->  Seq Scan on order_item oi  (cost=0.00..2047.00 rows=125000 width=14) (actual time=0.002..8.517 rows=125000 loops=1)
+                                       Buffers: shared hit=797
+                                 ->  Hash  (cost=1417.00..1417.00 rows=3262 width=8) (actual time=7.451..7.451 rows=3313 loops=1)
+                                       Buckets: 4096  Batches: 1  Memory Usage: 162kB
+                                       Buffers: shared hit=417
+                                       ->  Seq Scan on orders o  (cost=0.00..1417.00 rows=3262 width=8) (actual time=0.006..6.991 rows=3313 loops=1)
+                                             Filter: (((status)::text = 'delivered'::text) AND (order_date >= (now() - '30 days'::interval)))
+                                             Rows Removed by Filter: 46687
+                                             Buffers: shared hit=417
+                           ->  Hash  (cost=47.00..47.00 rows=2000 width=6) (actual time=0.419..0.419 rows=2000 loops=1)
+                                 Buckets: 2048  Batches: 1  Memory Usage: 91kB
+                                 Buffers: shared hit=27
+                                 ->  Seq Scan on customer c  (cost=0.00..47.00 rows=2000 width=6) (actual time=0.004..0.216 rows=2000 loops=1)
+                                       Buffers: shared hit=27
+                     ->  Hash  (cost=1.04..1.04 rows=4 width=7) (actual time=0.010..0.011 rows=4 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                           Buffers: shared hit=1
+                           ->  Seq Scan on delivery_zone z  (cost=0.00..1.04 rows=4 width=7) (actual time=0.004..0.005 rows=4 loops=1)
+                                 Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=360
+ Planning Time: 0.801 ms
+ Execution Time: 35.436 ms
+(43 rows)
+
