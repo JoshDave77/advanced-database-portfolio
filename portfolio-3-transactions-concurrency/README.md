@@ -1,6 +1,6 @@
 # Portfolio 3: Transactions and Concurrency
 
-**Case study:** Josh Kay's Fisheries. **DBMS:** PostgreSQL (tested on 16; replace with your own version).
+**Case study:** Josh Kay's Fisheries. **DBMS:** PostgreSQL 18.6.
 **Demo product:** smoked jumbo catfish per piece (`S-JUM-PIECE`), reset to exactly **1 piece in stock**, so two customers can compete for the last one.
 
 ## Files
@@ -9,7 +9,7 @@
 | `00_reset_demo.sql` | Resets the demo product to 1 piece and checks cache vs ledger |
 | `01_commit_rollback.sql` | Demo 1: COMMIT and ROLLBACK in one session |
 | `README.md` | Demos 2-5 are run by hand in two windows (steps below) |
-| `evidence/` | Put your own screenshots here (create the folder) |
+| `evidence/` | Demo screenshots and captured run output |
 
 ## Setup for two-window demos
 Open **two terminals** in VS Code (split the terminal). Start psql **from the repo root** in both:
@@ -94,19 +94,22 @@ Expected: `READ COMMITTED` shows **8420.00** on the second read (a non-repeatabl
 `REPEATABLE READ`: the second read stays **7920.00**.
 
 ---
-## Results summary (my notes from testing, replace with what YOU observed)
+## Results summary
 | Demo | Mechanism | Outcome |
 |---|---|---|
-| 1 | Transaction, COMMIT/ROLLBACK, CHECK constraint | Atomic: failed order leaves no rows |
-| 2 | None (stale read, absolute write) | Last piece sold twice, cache != ledger |
-| 3 | `FOR UPDATE` | Second buyer waits, then sees 0 stock |
-| 4 | `REPEATABLE READ` | Second buyer aborted, must retry |
-| 5 | READ COMMITTED vs REPEATABLE READ | Non-repeatable read demonstrated and prevented |
+| 1 | Transaction, COMMIT/ROLLBACK, CHECK constraint | The 2.5 kg order committed. The over-stock sale raised the expected CHECK error; rollback left no failed order or movement rows. |
+| 2 | Stale reads and absolute write | Both sessions read 1 and committed a sale. The check showed cached stock 0 and ledger stock -1. |
+| 3 | `SELECT ... FOR UPDATE` | Window B waited for A's lock, then read 0 after A committed; B rolled back rather than selling. |
+| 4 | `REPEATABLE READ` | Window B waited, then received `could not serialize access due to concurrent update` after A committed; B rolled back. |
+| 5 | `READ COMMITTED` and `REPEATABLE READ` | Under `READ COMMITTED`, A read 7920 then 8420. Under `REPEATABLE READ`, A read 7920 both times. |
 
 ## Technical reflection
-<!-- TODO (Joshua): write in your own words. Points to cover:
-- Why Demo 2 breaks: the decision is made on a stale read, and the write overwrites A's change
-- Locking (Demo 3) queues buyers but holds the row; isolation (Demo 4) fails fast and needs retry logic. When would each suit a fish business?
-- The CHECK constraint is a safety net, but alone it only rejects the second buyer AFTER order rows were inserted, so the transaction must roll back (Demo 1B)
-- The cached balance and the ledger drifting apart in Demo 2 is the cost of the denormalisation decision in Portfolio 1
-- Identity values (order_id) are not rolled back, so a failed order leaves a gap in the sequence -->
+Demo 2 showed why checking stock in one statement and later writing an application-calculated balance is unsafe. Both sessions read the same value of 1 before either sale committed. Each then recorded a sale and set the cached balance to 0, so both orders succeeded even though the ledger total became -1. The cached quantity and movement ledger can disagree when application writes are based on stale reads.
+
+The CHECK constraint protects the product balance from becoming negative, as Demo 1 showed, but it does not undo earlier order and movement inserts on its own. Those statements must be in the same transaction, and the application must roll the transaction back when the stock update fails. A failed insert can still consume an identity value, so gaps in `order_id` are normal and do not mean an order row is missing.
+
+In Demo 3, `SELECT ... FOR UPDATE` made the second session wait until the first finished; it then saw that stock was 0 and could reject the sale. This approach suits a checkout where waiting briefly for a stock decision is acceptable. Demo 4 used `REPEATABLE READ`: the second update waited but was then rejected with a serialization error, so an application using this approach needs to roll back and retry the whole transaction. That can suit workloads where detecting conflicts and retrying is preferable to queueing buyers for long periods.
+
+Demo 5 showed the difference between the isolation levels. Under `READ COMMITTED`, each statement sees a fresh committed snapshot, so the second price read changed after Window B's update. Under `REPEATABLE READ`, both reads used the same transaction snapshot and the price stayed at its original value for Window A.
+
+These were controlled demonstrations on one local PostgreSQL instance and a small dataset. They illustrate transaction behavior, but do not measure performance or simulate failures across separate database servers.

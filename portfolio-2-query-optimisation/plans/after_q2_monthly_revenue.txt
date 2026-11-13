@@ -1,32 +1,33 @@
-                                                                        QUERY PLAN                                                                        
-----------------------------------------------------------------------------------------------------------------------------------------------------------
- GroupAggregate  (cost=5733.02..6288.20 rows=12004 width=48) (actual time=42.725..48.229 rows=4 loops=1)
+                                                                         QUERY PLAN                                                                          
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=5743.88..6301.06 rows=12047 width=48) (actual time=76.482..88.585 rows=4.00 loops=1)
    Group Key: (date_trunc('month'::text, o.order_date))
    Buffers: shared hit=1256
-   ->  Sort  (cost=5733.02..5808.04 rows=30010 width=22) (actual time=40.893..42.206 rows=30349 loops=1)
+   ->  Sort  (cost=5743.88..5819.18 rows=30118 width=22) (actual time=73.243..75.101 rows=30349.00 loops=1)
          Sort Key: (date_trunc('month'::text, o.order_date)), o.order_id
-         Sort Method: quicksort  Memory: 2191kB
+         Sort Method: quicksort  Memory: 1954kB
          Buffers: shared hit=1256
-         ->  Hash Join  (cost=1051.13..3501.30 rows=30010 width=22) (actual time=4.474..29.999 rows=30349 loops=1)
+         ->  Hash Join  (cost=1052.91..3503.35 rows=30118 width=22) (actual time=9.712..54.964 rows=30349.00 loops=1)
                Hash Cond: (oi.order_id = o.order_id)
                Buffers: shared hit=1250
-               ->  Seq Scan on order_item oi  (cost=0.00..2047.00 rows=125000 width=14) (actual time=0.006..8.801 rows=125000 loops=1)
+               ->  Seq Scan on order_item oi  (cost=0.00..2047.00 rows=125000 width=14) (actual time=0.025..10.407 rows=125000.00 loops=1)
                      Buffers: shared hit=797
-               ->  Hash  (cost=901.08..901.08 rows=12004 width=12) (actual time=4.400..4.401 rows=12076 loops=1)
+               ->  Hash  (cost=902.32..902.32 rows=12047 width=12) (actual time=9.587..9.588 rows=12076.00 loops=1)
                      Buckets: 16384  Batches: 1  Memory Usage: 647kB
                      Buffers: shared hit=453
-                     ->  Bitmap Heap Scan on orders o  (cost=236.24..901.08 rows=12004 width=12) (actual time=0.620..3.078 rows=12076 loops=1)
+                     ->  Bitmap Heap Scan on orders o  (cost=236.58..902.32 rows=12047 width=12) (actual time=1.446..7.059 rows=12076.00 loops=1)
                            Recheck Cond: (order_date >= (now() - '90 days'::interval))
                            Filter: ((status)::text <> 'cancelled'::text)
                            Rows Removed by Filter: 391
                            Heap Blocks: exact=417
                            Buffers: shared hit=453
-                           ->  Bitmap Index Scan on idx_orders_date  (cost=0.00..233.23 rows=12392 width=0) (actual time=0.572..0.572 rows=12467 loops=1)
+                           ->  Bitmap Index Scan on idx_orders_date  (cost=0.00..233.57 rows=12437 width=0) (actual time=1.355..1.355 rows=12467.00 loops=1)
                                  Index Cond: (order_date >= (now() - '90 days'::interval))
+                                 Index Searches: 1
                                  Buffers: shared hit=36
  Planning:
-   Buffers: shared hit=185
- Planning Time: 0.538 ms
- Execution Time: 48.440 ms
-(28 rows)
+   Buffers: shared hit=191
+ Planning Time: 9.255 ms
+ Execution Time: 89.325 ms
+(29 rows)
 

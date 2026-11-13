@@ -1,28 +1,29 @@
-                                                                        QUERY PLAN                                                                        
-----------------------------------------------------------------------------------------------------------------------------------------------------------
- Sort  (cost=1324.97..1325.03 rows=24 width=54) (actual time=2.870..2.873 rows=24 loops=1)
+                                                                         QUERY PLAN                                                                          
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1324.97..1325.03 rows=24 width=54) (actual time=5.357..5.359 rows=24.00 loops=1)
    Sort Key: o.order_date DESC
    Sort Method: quicksort  Memory: 26kB
    Buffers: shared hit=495
-   ->  GroupAggregate  (cost=1323.52..1324.42 rows=24 width=54) (actual time=2.812..2.838 rows=24 loops=1)
+   ->  GroupAggregate  (cost=1323.52..1324.42 rows=24 width=54) (actual time=5.283..5.314 rows=24.00 loops=1)
          Group Key: o.order_id
          Buffers: shared hit=492
-         ->  Sort  (cost=1323.52..1323.67 rows=60 width=32) (actual time=2.802..2.805 rows=54 loops=1)
+         ->  Sort  (cost=1323.52..1323.67 rows=60 width=32) (actual time=5.246..5.249 rows=54.00 loops=1)
                Sort Key: o.order_id
-               Sort Method: quicksort  Memory: 28kB
+               Sort Method: quicksort  Memory: 27kB
                Buffers: shared hit=492
-               ->  Nested Loop  (cost=0.29..1321.75 rows=60 width=32) (actual time=0.200..2.779 rows=54 loops=1)
+               ->  Nested Loop  (cost=0.29..1321.75 rows=60 width=32) (actual time=0.329..5.204 rows=54.00 loops=1)
                      Buffers: shared hit=489
-                     ->  Seq Scan on orders o  (cost=0.00..1042.00 rows=24 width=22) (actual time=0.191..2.637 rows=24 loops=1)
+                     ->  Seq Scan on orders o  (cost=0.00..1042.00 rows=24 width=22) (actual time=0.296..4.873 rows=24.00 loops=1)
                            Filter: (customer_id = 1234)
                            Rows Removed by Filter: 49976
                            Buffers: shared hit=417
-                     ->  Index Scan using order_item_pkey on order_item oi  (cost=0.29..11.63 rows=3 width=14) (actual time=0.005..0.005 rows=2 loops=24)
+                     ->  Index Scan using order_item_pkey on order_item oi  (cost=0.29..11.63 rows=3 width=14) (actual time=0.012..0.013 rows=2.25 loops=24)
                            Index Cond: (order_id = o.order_id)
+                           Index Searches: 24
                            Buffers: shared hit=72
  Planning:
-   Buffers: shared hit=153
- Planning Time: 0.520 ms
- Execution Time: 2.935 ms
-(24 rows)
+   Buffers: shared hit=163
+ Planning Time: 4.623 ms
+ Execution Time: 5.466 ms
+(25 rows)
 

@@ -12,13 +12,12 @@
 - `er-diagram.md` / `er-diagram.png`: entity relationship diagram
 
 ## Key design decisions
-<!-- TODO (Joshua): rewrite each point in your own words after reviewing it. -->
-1. **Products are form + size grade + selling unit.** Some products sell per kg and others per piece, so `sell_unit` is a column with a CHECK, and quantities are `NUMERIC` so 2.5 kg and 3 pieces both work.
-2. **`order_item` has a composite primary key** (`order_id`, `product_id`). One product appears once per order.
-3. **`order_item.unit_price` is a price snapshot.** It is a historical fact about the sale, not a copy of `product.unit_price`, so it does not violate 3NF.
-4. **`stock_movement` is an append-only ledger** and `product.quantity_on_hand` is a cached balance. This is a deliberate denormalisation for fast stock checks, protected by `CHECK (quantity_on_hand >= 0)`. It is also the constraint that stops overselling in Portfolio 3.
-5. **Business rules live in CHECK constraints:** transfers must carry a reference, delivery time cannot precede dispatch time, stock-in is positive and sales are negative.
-6. **`delivery_zone` is its own table**, so zone fee changes in one place. It is also the planned sharding key in Portfolio 5.
+1. **I describe each product by its form, size grade, and selling unit.** Because catfish can be sold by the kilogram or by the piece, `sell_unit` restricts the allowed units and `NUMERIC` quantities can represent amounts such as 2.5 kg.
+2. **I use (`order_id`, `product_id`) as the `order_item` primary key.** This makes each product appear at most once in an order.
+3. **I store the sale-time price in `order_item.unit_price`.** This preserves the amount charged if the product's current price changes later; it describes that order line rather than duplicating the current catalogue price.
+4. **I keep stock movements as an append-only record of changes and store `product.quantity_on_hand` as a cached balance.** The cached value makes stock checks convenient, and a non-negative CHECK constraint guards against simple over-decrements. Concurrent sales still need transaction controls, as demonstrated in Portfolio 3.
+5. **I use CHECK constraints to enforce important business rules.** For example, a transfer payment needs a reference, delivery cannot happen before dispatch, and stock-in and sale movements must have the appropriate quantity signs.
+6. **I store delivery zones in a separate `delivery_zone` table.** This keeps each zone's fee in one place and gives the design a possible zone-based sharding key for Portfolio 5.
 
 ## Normalisation walkthrough
 Start from an unnormalised order sheet: `order_no, customer_name, phone, address, zone, product_1, qty_1, price_1, product_2, qty_2, price_2, payment_method, rider`.

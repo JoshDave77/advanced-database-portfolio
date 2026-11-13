@@ -1,16 +1,16 @@
-                                                       QUERY PLAN                                                       
-------------------------------------------------------------------------------------------------------------------------
- Sort  (cost=3541.13..3543.68 rows=1022 width=30) (actual time=9.400..9.450 rows=1009 loops=1)
+                                                        QUERY PLAN                                                         
+---------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=3539.81..3542.31 rows=999 width=30) (actual time=22.941..22.994 rows=1008.00 loops=1)
    Sort Key: moved_at DESC
-   Sort Method: quicksort  Memory: 80kB
+   Sort Method: quicksort  Memory: 72kB
    Buffers: shared hit=1030
-   ->  Seq Scan on stock_movement  (cost=0.00..3490.04 rows=1022 width=30) (actual time=0.037..9.152 rows=1009 loops=1)
+   ->  Seq Scan on stock_movement  (cost=0.00..3490.04 rows=999 width=30) (actual time=0.080..22.377 rows=1008.00 loops=1)
          Filter: ((product_id = 10) AND (moved_at >= (now() - '30 days'::interval)))
-         Rows Removed by Filter: 122143
+         Rows Removed by Filter: 122144
          Buffers: shared hit=1027
  Planning:
-   Buffers: shared hit=100
- Planning Time: 0.484 ms
- Execution Time: 9.508 ms
+   Buffers: shared hit=105
+ Planning Time: 2.949 ms
+ Execution Time: 23.086 ms
 (12 rows)
 

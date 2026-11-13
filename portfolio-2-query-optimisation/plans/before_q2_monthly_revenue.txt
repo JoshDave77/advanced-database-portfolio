@@ -1,27 +1,27 @@
-                                                              QUERY PLAN                                                               
----------------------------------------------------------------------------------------------------------------------------------------
- GroupAggregate  (cost=6256.96..6813.81 rows=12040 width=48) (actual time=56.170..64.751 rows=4 loops=1)
+                                                                QUERY PLAN                                                                 
+-------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=6282.36..6844.48 rows=12154 width=48) (actual time=86.887..99.651 rows=4.00 loops=1)
    Group Key: (date_trunc('month'::text, o.order_date))
    Buffers: shared hit=1220
-   ->  Sort  (cost=6256.96..6332.21 rows=30100 width=22) (actual time=53.046..55.013 rows=30349 loops=1)
+   ->  Sort  (cost=6282.36..6358.32 rows=30385 width=22) (actual time=83.898..85.815 rows=30349.00 loops=1)
          Sort Key: (date_trunc('month'::text, o.order_date)), o.order_id
-         Sort Method: quicksort  Memory: 2191kB
+         Sort Method: quicksort  Memory: 1954kB
          Buffers: shared hit=1220
-         ->  Hash Join  (cost=1567.50..4017.90 rows=30100 width=22) (actual time=10.523..39.341 rows=30349 loops=1)
+         ->  Hash Join  (cost=1568.92..4020.03 rows=30385 width=22) (actual time=18.976..64.935 rows=30349.00 loops=1)
                Hash Cond: (oi.order_id = o.order_id)
                Buffers: shared hit=1214
-               ->  Seq Scan on order_item oi  (cost=0.00..2047.00 rows=125000 width=14) (actual time=0.003..9.821 rows=125000 loops=1)
+               ->  Seq Scan on order_item oi  (cost=0.00..2047.00 rows=125000 width=14) (actual time=0.052..10.392 rows=125000.00 loops=1)
                      Buffers: shared hit=797
-               ->  Hash  (cost=1417.00..1417.00 rows=12040 width=12) (actual time=10.454..10.455 rows=12076 loops=1)
+               ->  Hash  (cost=1417.00..1417.00 rows=12154 width=12) (actual time=18.832..18.833 rows=12076.00 loops=1)
                      Buckets: 16384  Batches: 1  Memory Usage: 647kB
                      Buffers: shared hit=417
-                     ->  Seq Scan on orders o  (cost=0.00..1417.00 rows=12040 width=12) (actual time=0.008..8.813 rows=12076 loops=1)
+                     ->  Seq Scan on orders o  (cost=0.00..1417.00 rows=12154 width=12) (actual time=0.026..16.560 rows=12076.00 loops=1)
                            Filter: (((status)::text <> 'cancelled'::text) AND (order_date >= (now() - '90 days'::interval)))
                            Rows Removed by Filter: 37924
                            Buffers: shared hit=417
  Planning:
-   Buffers: shared hit=156
- Planning Time: 0.610 ms
- Execution Time: 64.919 ms
+   Buffers: shared hit=161
+ Planning Time: 4.958 ms
+ Execution Time: 100.418 ms
 (23 rows)
 
