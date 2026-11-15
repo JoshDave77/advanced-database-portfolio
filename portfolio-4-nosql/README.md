@@ -1,47 +1,49 @@
 # Portfolio 4: NoSQL and Advanced Data Models
 
-**Case study:** Josh Kay's Fisheries. **Model type:** document database (MongoDB).
-**Tested on:** MongoDB Server 9.0.8 and mongosh 2.14.2.
-**Data:** repeatable synthetic data: 16 products, 500 customers, 10,000 orders, 24,669 stock movements.
+**Case study:** I modelled Josh Kay's Fisheries with a document database (MongoDB).
+**Tested on:** I ran my tests with MongoDB Server 9.0.8 and mongosh 2.14.2.
+**Data:** I generated repeatable synthetic data: 16 products, 500 customers, 10,000 orders and 24,669 stock movements.
 
 ## Files
 | File | Purpose |
 |---|---|
-| `01_seed.js` | Creates collections, schema validation, unique indexes and the synthetic data |
-| `02_queries.js` | Eight example operations: reads, updates, aggregations, `$lookup`, validation |
-| `03_indexes_explain.js` | `explain("executionStats")` before and after adding indexes |
-| `evidence/` | Captures of the seed, query examples and index comparison |
+| `01_seed.js` | I use this to create my collections, schema validation, unique indexes and synthetic data |
+| `02_queries.js` | I use this for the eight read, update, aggregation, `$lookup` and validation operations |
+| `03_indexes_explain.js` | I use this to capture `explain("executionStats")` before and after adding indexes |
+| `evidence/` | My captures of the seed, query examples and index comparison |
 
-## How to run
-From the repository root in PowerShell, set `$mongosh` to the location of your `mongosh.exe`. This is the path used
-for this run; change it if you extracted mongosh elsewhere:
+## How I ran the scripts
+I ran these commands from the repository root in PowerShell. I set `$mongosh` to the location of my `mongosh.exe`;
+change the path if you extracted mongosh elsewhere:
 ```powershell
 $mongosh = "$env:USERPROFILE\Documents\mongosh-2.14.2-win32-x64\mongosh-2.14.2-win32-x64\bin\mongosh.exe"
 & $mongosh "mongodb://localhost:27017/fisheries" --file ".\portfolio-4-nosql\01_seed.js"
 & $mongosh "mongodb://localhost:27017/fisheries" --file ".\portfolio-4-nosql\02_queries.js"
 & $mongosh "mongodb://localhost:27017/fisheries" --file ".\portfolio-4-nosql\03_indexes_explain.js"
 ```
-The seed script drops and recreates the four project collections, so only run it when it is safe to reset this data.
-The query script updates sample orders and appends a payment. The explain script removes and recreates its three
-performance indexes, making the comparison repeatable. This local MongoDB server has access control disabled; keep it
-local and do not expose it to a network. If using Atlas, replace the connection string and never commit credentials.
+I noted that the seed script drops and recreates the four project collections, so I only run it when it is safe to reset
+this data. The query script updates sample orders and appends a payment. The explain script removes and recreates its
+three performance indexes, making the comparison repeatable. I ran this local MongoDB server with access control
+disabled, so I keep it local and do not expose it to a network. If I use Atlas, I replace the connection string and
+never commit credentials.
 
-## The model: what I embedded and what I referenced
-| Relational (Portfolio 1) | MongoDB | Decision and reason |
+## My model: what I embedded and what I referenced
+| Relational (Portfolio 1) | MongoDB | My decision and reason |
 |---|---|---|
-| `orders` + `order_item` + `payment` + `delivery` | **one `orders` document** with `items[]`, `payments[]`, `delivery{}` | Always read together; bounded size (a few items); one read replaces a 4-table join |
-| `customer` details on an order | `customer{}` **snapshot** inside the order, plus `customerId` | Order history is shown without a second lookup; the snapshot also records who the customer was at order time |
-| `product` | separate `products` collection | Referenced by SKU; changes independently; has `attributes{}` that differ by form |
-| `stock_movement` | separate `stock_movements` collection | Append-only and grows without limit, so it must not be embedded (16 MB document limit) |
-| `delivery_zone` | zone name stored as a field | Only four values; fee is stored on the order as a snapshot |
+| `orders` + `order_item` + `payment` + `delivery` | **one `orders` document** with `items[]`, `payments[]`, `delivery{}` | I embedded these fields because I commonly read them together and each order has a bounded number of items; this replaces a 4-table join for the order view |
+| `customer` details on an order | `customer{}` **snapshot** inside the order, plus `customerId` | I stored a snapshot so I can show order history without a second lookup and preserve the customer's details as they were when the order was placed |
+| `product` | separate `products` collection | I kept products separate because I reference them by SKU, manage them independently, and their `attributes{}` differ by form |
+| `stock_movement` | separate `stock_movements` collection | I kept stock movements separate because the append-only history grows without limit and should not be embedded (16 MB document limit) |
+| `delivery_zone` | zone name stored as a field | I stored the zone name on the order because there are only four values, and kept the fee there as an order-time snapshot |
 
-**Where the document model fits this business well:** fresh products carry `source/handling`, smoked products carry
-`smokingMethod/woodType`. In SQL that is nullable columns or an extra table; in MongoDB each document holds only the
-attributes it needs. Customers without an email simply have no `email` field.
+**Where I found the document model useful:** I stored `source/handling` for fresh products and `smokingMethod/woodType`
+for smoked products. In SQL, I would use nullable columns or an extra table; in MongoDB, I can store only the
+attributes each document needs. I left out the `email` field for customers who do not have one.
 
 ## Evidence summary
-The baseline retained MongoDB's `_id_` index and the unique `orderNo_1` index, but did not yet have indexes for these
-query filters. The after run added indexes on customer phone, order status/date, and embedded item SKU/status.
+In my baseline run on the `orders` collection, MongoDB retained its `_id_` index and the unique `orderNo_1` index, but
+I had not yet added indexes for these query filters. In the after run, I added indexes on customer phone, order status/date,
+and embedded item SKU/status.
 
 | Query | Before: plan; examined / returned; time | After: plan; examined / returned; time |
 |---|---|---|
@@ -49,29 +51,29 @@ query filters. The after run added indexes on customer phone, order status/date,
 | E2 pending orders, last 30 days, sorted | SORT>COLLSCAN; 10,000 / 19; 12 ms | FETCH>IXSCAN; 19 / 19; 26 ms |
 | E3 pending orders containing a SKU | COLLSCAN; 10,000 / 38; 17 ms | FETCH>IXSCAN; 38 / 38; 24 ms |
 
-The indexes reduced documents examined by about 99.6–99.8% for these queries, and E2 no longer needed a sort stage.
-Elapsed times were higher after indexing in this single run. At this dataset size, millisecond timings are small and
-noisy, so they do not demonstrate a speedup here; the explain plans and documents-examined counts are the clearer
-evidence that the indexes narrowed the work. The `items.sku` index is multikey because it indexes values in the
+I found that the indexes reduced documents examined by about 99.6–99.8% for these queries, and E2 no longer needed a
+sort stage. Elapsed times were higher after indexing in this single run. At this dataset size, the millisecond timings
+are small; they did not show a speedup in my run. I used the explain plans and documents-examined counts as clearer
+evidence that the indexes narrowed the work. The `items.sku` index is multikey because it indexes values in my
 embedded `items` array.
 
-Evidence files are in `evidence/`: `p4-seed-run.png`, `p4-queries-q1-q4.png`, `p4-queries-q1-q4 2.png`,
+I saved my evidence files in `evidence/`: `p4-seed-run.png`, `p4-queries-q1-q4.png`, `p4-queries-q1-q4 2.png`,
 `p4-queries-q1-q4 3.png`, `p4-queries-q5-q8 4.png`, `p4-queries-q5-q8 5.png`, and `p4-indexes-explain.png`.
 
 ## Why a document database suits (and does not suit) this case study
-I embedded order items, payments, delivery details and a customer snapshot because they are commonly read with the order.
-This keeps the order view convenient, and the snapshot preserves the customer's details as they were when the order was
-placed. The trade-off is duplicated data: a later customer phone change will not update old order snapshots. Item names
-are also copied into order lines so the order retains what was sold if the catalogue changes.
+I embedded order items, payments, delivery details and a customer snapshot because I commonly read them with the order.
+I did this to keep the order view convenient, and to preserve the customer's details as they were when the order was
+placed. I accepted the trade-off of duplicated data: a later customer phone change will not update old order snapshots.
+I also copied item names into order lines so each order retains what was sold if the catalogue changes.
 
-I kept products separate because the catalogue is managed independently and fresh and smoked products have different
-attributes. I also kept stock movements in their own collection because that history grows over time. The cached
-`stockOnHand` value on each product must remain consistent with those movements. Concurrent sales therefore need
-careful consistency controls to prevent overselling. MongoDB supports multi-document transactions on replica sets and
-sharded clusters, but the scripts here do not implement a transactional stock workflow. For this case study, I would
-prefer a relational database for tightly constrained inventory and accounting workflows, while MongoDB is a good fit
-for the flexible catalogue and order-oriented read model. A real system could combine them; a key-value store such as
-Redis could also be considered for carts or counters, but I did not implement one.
+I kept products separate because I manage the catalogue independently and fresh and smoked products have different
+attributes. I also kept stock movements in their own collection because that history grows over time. I would need to
+keep each product's cached `stockOnHand` value consistent with its movements, so concurrent sales need careful controls
+to prevent overselling. MongoDB supports multi-document transactions on replica sets and sharded clusters, but I did not
+implement a transactional stock workflow in these scripts. For this case study, I would prefer a relational database
+for tightly constrained inventory and accounting workflows, while using MongoDB for the flexible catalogue and
+order-oriented read model. I could combine the two in a real system; I could also consider a key-value store such as
+Redis for carts or counters, but I did not implement one.
 
 ## Technical reflection
 I ran MongoDB locally and verified the connection with a ping before loading the data. The server was MongoDB 9.0.8,
@@ -80,8 +82,7 @@ path from PowerShell. I also initially entered a PowerShell command at the mongo
 JavaScript and returned a syntax error. Exiting to PowerShell and running the scripts with `--file` resolved that
 confusion.
 
-The seed completed with 16 products, 500 customers, 10,000 orders, and 24,669 stock movements. All eight query
-examples ran, including the expected schema-validation rejections. The index comparison taught me not to judge an
-index only by elapsed milliseconds: in this run, times rose slightly even though the query plans used indexes and
-documents examined fell sharply. A larger dataset and repeated controlled measurements would be needed to compare
-latency reliably.
+My seed run created 16 products, 500 customers, 10,000 orders and 24,669 stock movements. I ran all eight query
+examples, including the expected schema-validation rejections. The index comparison taught me not to judge an
+index only by elapsed milliseconds: in my run, times rose even though I observed the query plans use indexes and the
+documents examined fell sharply. I would need a larger dataset and repeated controlled measurements to compare latency reliably.
