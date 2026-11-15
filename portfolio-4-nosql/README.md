@@ -57,8 +57,8 @@ are small; they did not show a speedup in my run. I used the explain plans and d
 evidence that the indexes narrowed the work. The `items.sku` index is multikey because it indexes values in my
 embedded `items` array.
 
-I saved my evidence files in `evidence/`: `p4-seed-run.png`, `p4-queries-q1-q4.png`, `p4-queries-q1-q4 2.png`,
-`p4-queries-q1-q4 3.png`, `p4-queries-q5-q8 4.png`, `p4-queries-q5-q8 5.png`, and `p4-indexes-explain.png`.
+I saved my evidence files in `evidence/`: `p4-seed-run.png`, `p4-queries-q1-q4.png`, `p4-queries-q1-q4-2.png`,
+`p4-queries-q1-q4-3.png`, `p4-queries-q5-q8-4.png`, `p4-queries-q5-q8-5.png`, and `p4-indexes-explain.png`.
 
 ## Why a document database suits (and does not suit) this case study
 I embedded order items, payments, delivery details and a customer snapshot because I commonly read them with the order.
@@ -86,3 +86,10 @@ My seed run created 16 products, 500 customers, 10,000 orders and 24,669 stock m
 examples, including the expected schema-validation rejections. The index comparison taught me not to judge an
 index only by elapsed milliseconds: in my run, times rose even though I observed the query plans use indexes and the
 documents examined fell sharply. I would need a larger dataset and repeated controlled measurements to compare latency reliably.
+
+## References
+- MongoDB, Inc. *MongoDB Manual: Data Modeling*. https://www.mongodb.com/docs/manual/data-modeling/
+- MongoDB, Inc. *MongoDB Manual: Schema Validation*. https://www.mongodb.com/docs/manual/core/schema-validation/
+- MongoDB, Inc. *MongoDB Manual: Indexes*. https://www.mongodb.com/docs/manual/indexes/
+- MongoDB, Inc. *MongoDB Manual: Explain Results*. https://www.mongodb.com/docs/manual/reference/explain-results/
+- MongoDB, Inc. *MongoDB Manual: Transactions*. https://www.mongodb.com/docs/manual/core/transactions/

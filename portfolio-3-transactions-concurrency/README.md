@@ -113,3 +113,7 @@ In Demo 3, I used `SELECT ... FOR UPDATE` to make the second session wait until 
 In Demo 5, I observed the difference between the isolation levels. Under `READ COMMITTED`, each statement saw a fresh committed snapshot, so the second price read changed after Window B's update. Under `REPEATABLE READ`, both reads used the same transaction snapshot and the price stayed at its original value in Window A.
 
 I ran these controlled demonstrations on one local PostgreSQL instance and a small dataset. They helped me understand transaction behaviour, but they do not measure performance or simulate failures across separate database servers.
+
+## References
+- PostgreSQL Global Development Group. *PostgreSQL 18 Documentation: Transaction Isolation*. https://www.postgresql.org/docs/18/transaction-iso.html
+- PostgreSQL Global Development Group. *PostgreSQL 18 Documentation: Explicit Locking*. https://www.postgresql.org/docs/18/explicit-locking.html

@@ -76,15 +76,13 @@ Overall, these exercises strengthened my understanding of relational modelling, 
 
 Repository: https://github.com/JoshDave77/advanced-database-portfolio
 
-I keep the repository private. It contains my five portfolio folders, database scripts, schemas, README files and supporting evidence. I organised screenshots, execution plans and other practical evidence in the respective portfolio evidence folders. I will confirm assessor access before submission.
+I have made the repository public so it can be accessed without a GitHub account. It contains my five portfolio folders, database scripts, schemas, README files and supporting evidence. I organised screenshots, execution plans and other practical evidence in the respective portfolio evidence folders. I will confirm assessor access before submission.
 
 5. AI-USE DECLARATION
 
-I used an AI assistant through Copilot SDK in VS Code to explain database concepts, troubleshoot local commands and script issues, edit technical documentation and draft this summary.
+I used Claude (Anthropic), through claude.ai, and an AI assistant through Copilot SDK in VS Code. Claude helped me develop the case-study design, draft SQL, MongoDB and shell scripts and README templates, explain concepts, guide setup, review documentation and outline this summary. Copilot helped me troubleshoot commands and scripts, correct shell quoting, add readiness timeouts, explain concepts and edit documentation.
 
-AI assistance also helped me correct shell-script quoting for executable paths containing spaces and add clearer readiness timeouts. I checked the changed shell scripts using bash -n.
-
-I ran the database exercises and reviewed the reported results against terminal outputs and saved evidence. I am responsible for checking this document, ensuring that it reflects my actual work and understanding, and being able to explain the submitted database designs, scripts and results.
+I ran the database exercises myself, checked results against terminal outputs and saved evidence, replaced template figures with results from my runs, and checked changed shell scripts using bash -n. I am responsible for the accuracy of this document and can explain the submitted database designs, scripts and results.
 
 6. REFERENCES
 
@@ -95,3 +93,6 @@ I ran the database exercises and reviewed the reported results against terminal 
 5. MongoDB, Inc. MongoDB Manual: Write Concern. https://www.mongodb.com/docs/manual/reference/write-concern/
 6. MongoDB, Inc. MongoDB Manual: Explain Results. https://www.mongodb.com/docs/manual/reference/explain-results/
 7. MongoDB, Inc. MongoDB Manual: Read Preference. https://www.mongodb.com/docs/manual/core/read-preference/
+8. PostgreSQL Global Development Group. PostgreSQL 18 Documentation: Using EXPLAIN. https://www.postgresql.org/docs/18/using-explain.html
+9. PostgreSQL Global Development Group. PostgreSQL 18 Documentation: Indexes. https://www.postgresql.org/docs/18/indexes.html
+10. MongoDB, Inc. MongoDB Manual: Schema Validation. https://www.mongodb.com/docs/manual/core/schema-validation/

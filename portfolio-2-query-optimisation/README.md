@@ -54,3 +54,7 @@ I saw smaller improvements in Q2 and Q3 because their plans still read all 125,0
 I considered the storage and maintenance costs of indexes: the database must update them when rows are inserted, updated or deleted. I would use indexes where they help frequent, selective queries, while weighing that cost for tables such as `orders` and `stock_movement` that also receive writes.
 
 I measured these timings in one warm run on a small synthetic dataset, so they can vary with cache state, hardware and PostgreSQL version. I used the execution plans and rows scanned to explain the changes, but I would not treat these measurements as guaranteed performance for a production-sized database.
+
+## References
+- PostgreSQL Global Development Group. *PostgreSQL 18 Documentation: Using EXPLAIN*. https://www.postgresql.org/docs/18/using-explain.html
+- PostgreSQL Global Development Group. *PostgreSQL 18 Documentation: Indexes*. https://www.postgresql.org/docs/18/indexes.html

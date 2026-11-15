@@ -48,7 +48,7 @@ when I wanted to preserve the data and logs.
 | 01 | **Replica-set setup** | I saw one PRIMARY and two SECONDARY members; the set contained 16 products, 500 customers, 10,000 orders and 24,669 stock movements |
 | 02 | **Replication, durability** | My `w:"majority"` write was acknowledged; each member reported `orders=10000`, `products=16` and the replicated log entry |
 | 03 | **Availability** | I observed an election from port 27019 to 27018 in about 3 seconds; my majority write worked with 2 of 3 members, and the old primary rejoined |
-| 04 | **Consistency vs availability (CAP)** | With one of three members left, I saw writes refused (`not primary`) while reads worked, and the set recovered |
+| 04 | **Majority-quorum behavior (CAP-related)** | With one of three members left, I saw writes refused (`not primary`) while reads worked, and the set recovered |
 
 In my run, shutting down the primary cleanly led to an election in about **3 seconds**. After Demo 03, each member
 reported four `failover_log` entries. In Demo 04, the lone member refused my write but returned `orders=10000` for a read;
@@ -58,16 +58,17 @@ default election timeout is 10 seconds.
 ## My consistency and availability choices for the fisheries data
 | Data | Write concern | Reads from | My reason |
 |---|---|---|---|
-| Orders, payments | `w: "majority"` | Primary | I would protect these money records through failover and avoid stale reads |
+| Orders, payments | `w: "majority"` | Primary | I would use majority write concern for failover durability and primary reads to avoid secondary lag. For stronger read guarantees across operations, I would also use majority read concern and causal consistency as appropriate. |
 | Stock quantity | `w: "majority"` | **Primary only** | I would avoid stale stock reads that could lead to overselling, as I demonstrated in Portfolio 3 |
 | Sales reports, revenue by zone | default | Secondary (`secondaryPreferred`) | I consider a few seconds of delay acceptable for reports, and secondary reads can move load off the primary |
-| Product catalogue | `w: 1` is acceptable | Secondary | I consider this reasonable for a catalogue that rarely changes, where fast writes matter more |
+| Product catalogue | `w: 1` is acceptable | Secondary | For infrequent, recoverable catalogue changes, I might accept this trade-off; secondary reads can lag, so I would use primary reads when immediate visibility matters. |
 
-## My CAP discussion (demonstrated in Demo 04)
+## My CAP-related availability discussion (demonstrated in Demo 04)
 In my test, the remaining member could not form a majority and stepped down as primary. The database refused my write,
-while a `secondaryPreferred` read still returned the order count. My test showed that the replica set favoured write
-consistency over availability in this failure case; a secondary read can still be stale. For a business taking orders,
-I would rather retry a refused order than risk conflicting stock counts.
+while a `secondaryPreferred` read still returned the order count. This showed the replica set's majority-quorum behavior
+when it could not elect or retain a primary; it was not a test of a real network partition because all members ran on one
+computer. A secondary read can still be stale. For a business taking orders, I would rather retry a refused order than
+risk conflicting stock counts.
 
 ## Sharding design (NOT implemented, discussion only)
 I considered sharding as a way to split data across machines. For `orders`, I compared:
@@ -95,7 +96,7 @@ primary would take writes, while hot standbys could serve read-only reports and 
 
 ## Evidence checklist
 - [x] `01`: I captured three members, one PRIMARY and two SECONDARY (`p5-01-replica-set-start.png`)
-- [x] `02`: I captured the same document counts on all three members (`p5-02-replication-check.png`; an additional capture is `p5-02-replication 2-check.png`)
+- [x] `02`: I captured the same document counts on all three members (`p5-02-replication-check.png`; an additional capture is `p5-02-replication-check-2.png`)
 - [x] `03`: I captured the election, write during the outage and old primary rejoining (`p5-03a-failover-election.png`, `p5-03b-failover-recovery.png`)
 - [x] `04`: I captured `REFUSED: not primary` and a successful read (`p5-04-majority-loss.png`)
 - [ ] I did not capture an Atlas cluster page or query output (optional)
@@ -113,3 +114,10 @@ and the old primary rejoined and caught up. I was most surprised by Demo 04: the
 the read I tested, but refused my write after losing its majority. I would keep stock reads on the primary because stale
 secondary reads could lead to overselling. By running three members on separate ports and data directories, I
 demonstrated member failure and recovery, but not independent hardware or a real network partition.
+
+## References
+- MongoDB, Inc. *MongoDB Manual: Replication*. https://www.mongodb.com/docs/manual/replication/
+- MongoDB, Inc. *MongoDB Manual: Write Concern*. https://www.mongodb.com/docs/manual/reference/write-concern/
+- MongoDB, Inc. *MongoDB Manual: Read Preference*. https://www.mongodb.com/docs/manual/core/read-preference/
+- MongoDB, Inc. *MongoDB Manual: Sharding*. https://www.mongodb.com/docs/manual/sharding/
+- MongoDB, Inc. *MongoDB Atlas Documentation*. https://www.mongodb.com/docs/atlas/

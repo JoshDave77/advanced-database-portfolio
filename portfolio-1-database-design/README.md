@@ -33,3 +33,7 @@ createdb fisheries
 psql -d fisheries -f schema.sql
 \dt   # 10 tables expected
 ```
+
+## References
+- Miva Open University. (2026/2027). *MIT 8103 Advanced Database Systems: Individual Practical Database Portfolio*. First Semester Continuous Assessment.
+- PostgreSQL Global Development Group. *PostgreSQL 18 Documentation: Constraints*. https://www.postgresql.org/docs/18/ddl-constraints.html
